@@ -17,6 +17,10 @@ const deploymentStyles = {
   none: 'status-muted'
 };
 
+function notifyAuthChange(hasToken) {
+  window.dispatchEvent(new CustomEvent('admin-projects-auth-change', { detail: { hasToken } }));
+}
+
 function formatDate(value) {
   if (!value) return 'Sin datos';
 
@@ -154,15 +158,40 @@ export default function Dashboard() {
   const [inputToken, setInputToken] = useState('');
   const [repos, setRepos] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [refreshIndex, setRefreshIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  function clearSession() {
+    localStorage.removeItem(TOKEN_STORAGE_KEY);
+    setToken('');
+    setRepos([]);
+    setSearchQuery('');
+    setError('');
+    notifyAuthChange(false);
+  }
 
   useEffect(() => {
     const savedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
 
     if (savedToken) {
       setToken(savedToken);
+      notifyAuthChange(true);
+    } else {
+      notifyAuthChange(false);
     }
+  }, []);
+
+  useEffect(() => {
+    function handleExternalLogout() {
+      clearSession();
+    }
+
+    window.addEventListener('admin-projects-logout', handleExternalLogout);
+
+    return () => {
+      window.removeEventListener('admin-projects-logout', handleExternalLogout);
+    };
   }, []);
 
   useEffect(() => {
@@ -197,7 +226,7 @@ export default function Dashboard() {
     return () => {
       isMounted = false;
     };
-  }, [token]);
+  }, [token, refreshIndex]);
 
   const filteredRepos = useMemo(() => {
     const cleanQuery = searchQuery.trim().toLowerCase();
@@ -210,13 +239,6 @@ export default function Dashboard() {
         .some((value) => value.toLowerCase().includes(cleanQuery));
     });
   }, [repos, searchQuery]);
-
-  const repoCountText = useMemo(() => {
-    if (isLoading) return 'Cargando repositorios...';
-    if (!repos.length) return 'Sin repositorios cargados';
-    if (searchQuery.trim()) return `${filteredRepos.length} de ${repos.length} repositorios`;
-    return `${repos.length} repositorios recientes`;
-  }, [filteredRepos.length, isLoading, repos.length, searchQuery]);
 
   function handleLogin(event) {
     event.preventDefault();
@@ -231,14 +253,11 @@ export default function Dashboard() {
     localStorage.setItem(TOKEN_STORAGE_KEY, cleanToken);
     setToken(cleanToken);
     setInputToken('');
+    notifyAuthChange(true);
   }
 
-  function handleLogout() {
-    localStorage.removeItem(TOKEN_STORAGE_KEY);
-    setToken('');
-    setRepos([]);
-    setSearchQuery('');
-    setError('');
+  function handleRefresh() {
+    setRefreshIndex((current) => current + 1);
   }
 
   if (!token) {
@@ -313,34 +332,24 @@ export default function Dashboard() {
   }
 
   return (
-    <section className="section-stack" aria-labelledby="repositories-title">
+    <section className="section-stack" aria-label="Repositorios de GitHub">
       <div className="panel">
-        <div className="panel-body dashboard-header">
-          <div>
-            <p className="eyebrow">GitHub dashboard</p>
-            <h2 id="repositories-title" className="text-3xl font-extrabold tracking-tight">
-              Repositorios
-            </h2>
-            <p className="mt-2 text-[var(--color-text-muted)]">{repoCountText}</p>
+        <div className="panel-body repo-toolbar">
+          <div className="repo-search-field">
+            <label className="label" htmlFor="repo-search">Buscar proyecto</label>
+            <input
+              id="repo-search"
+              className="input search-input"
+              type="search"
+              placeholder="Busca por nombre, descripción o URL..."
+              value={searchQuery}
+              onInput={(event) => setSearchQuery(event.currentTarget.value)}
+            />
           </div>
 
-          <button className="btn btn-danger btn-full-mobile" type="button" onClick={handleLogout}>
-            Cerrar sesión
+          <button className="btn btn-secondary btn-full-mobile" type="button" onClick={handleRefresh} disabled={isLoading}>
+            {isLoading ? 'Actualizando...' : 'Actualizar estado'}
           </button>
-        </div>
-      </div>
-
-      <div className="panel">
-        <div className="panel-body">
-          <label className="label" htmlFor="repo-search">Buscar proyecto</label>
-          <input
-            id="repo-search"
-            className="input search-input"
-            type="search"
-            placeholder="Busca por nombre, descripción o URL..."
-            value={searchQuery}
-            onInput={(event) => setSearchQuery(event.currentTarget.value)}
-          />
         </div>
       </div>
 
