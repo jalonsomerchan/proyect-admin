@@ -1,40 +1,121 @@
 ---
 import '../styles/global.css';
 import Dashboard from '../components/Dashboard.jsx';
+
+const canonicalUrl = 'https://jalonsomerchan.github.io/proyect-admin/';
+const pageTitle = 'Dashboard GitHub client-side | Proyect Admin';
+const pageDescription = 'Panel privado para consultar repositorios de GitHub, commits, lenguajes y deployments desde el navegador sin servidor propio.';
 ---
 
-<html lang="es" class="scroll-smooth">
+<html lang="es" data-theme="light">
   <head>
     <meta charset="utf-8" />
+    <script is:inline>
+      (() => {
+        const stored = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = stored || (prefersDark ? 'dark' : 'light');
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
     <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
     <link rel="icon" href={`${import.meta.env.BASE_URL}favicon.ico`} />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
-    <meta
-      name="description"
-      content="Panel privado y client-side para consultar los repositorios recientes de GitHub, sus últimos commits, lenguajes principales y deployments."
-    />
-    <title>Proyect Admin · Dashboard de repositorios GitHub</title>
+    <meta name="description" content={pageDescription} />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href={canonicalUrl} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={pageDescription} />
+
+    <title>{pageTitle}</title>
+    <script type="application/ld+json" set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'WebApplication',
+      name: 'Proyect Admin',
+      url: canonicalUrl,
+      applicationCategory: 'DeveloperApplication',
+      operatingSystem: 'Any',
+      description: pageDescription
+    })} />
   </head>
-  <body class="min-h-screen bg-slate-100 text-slate-900 antialiased dark:bg-slate-950 dark:text-white">
-    <main class="relative min-h-screen overflow-hidden px-4 py-8 sm:px-6 lg:px-8">
-      <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.24),transparent_32rem),radial-gradient(circle_at_bottom_right,rgba(99,102,241,0.2),transparent_28rem)]"></div>
+  <body>
+    <a href="#main" class="skip-link">Saltar al contenido</a>
 
-      <section class="mx-auto mb-10 max-w-5xl text-center">
-        <p class="mb-4 text-sm font-black uppercase tracking-[0.35em] text-sky-700 dark:text-sky-300">
-          Proyect Admin
-        </p>
-        <h1 class="text-4xl font-black tracking-tight text-slate-950 dark:text-white sm:text-5xl lg:text-6xl">
-          Dashboard client-side para tus repositorios de GitHub
-        </h1>
-        <p class="mx-auto mt-5 max-w-3xl text-lg leading-8 text-slate-600 dark:text-slate-300">
-          Visualiza tus últimos 20 repositorios actualizados, el último commit, el lenguaje principal y el estado del deployment más reciente usando solo la API pública de GitHub desde el navegador.
-        </p>
-      </section>
+    <div class="site-shell">
+      <header class="site-header">
+        <nav class="container-wide site-nav" aria-label="Navegación principal">
+          <a class="brand" href={import.meta.env.BASE_URL} aria-label="Inicio de Proyect Admin">
+            <span class="brand-mark" aria-hidden="true">PA</span>
+            <span>Proyect Admin</span>
+          </a>
 
-      <div class="mx-auto max-w-7xl">
-        <Dashboard client:load />
-      </div>
-    </main>
+          <div class="nav-actions">
+            <a class="btn btn-secondary" href="https://github.com/jalonsomerchan/proyect-admin" target="_blank" rel="noreferrer">
+              GitHub
+            </a>
+            <button class="btn btn-secondary" type="button" id="theme-toggle" aria-label="Cambiar modo claro u oscuro">
+              Tema
+            </button>
+          </div>
+        </nav>
+      </header>
+
+      <main id="main" class="page-main">
+        <section class="container-wide hero" aria-labelledby="hero-title">
+          <div class="hero-inner">
+            <p class="eyebrow">Herramienta privada · Sin servidor propio</p>
+            <h1 id="hero-title">Dashboard client-side para repositorios de GitHub</h1>
+            <p>
+              Visualiza tus últimos 20 repositorios actualizados, el último commit, el lenguaje principal y el estado del deployment más reciente usando solo la API de GitHub desde el navegador.
+            </p>
+            <div class="hero-meta" aria-label="Características principales">
+              <span class="badge badge-dot">Token en localStorage</span>
+              <span class="badge badge-dot">Astro + Preact</span>
+              <span class="badge badge-dot">Light y dark mode</span>
+            </div>
+          </div>
+        </section>
+
+        <div class="container-wide">
+          <Dashboard client:load />
+        </div>
+      </main>
+
+      <footer class="site-footer">
+        <div class="container-wide footer-inner">
+          <strong>Proyect Admin</strong>
+          <span>Panel ligero, accesible y mobile first para consultar información de GitHub de forma local en el navegador.</span>
+        </div>
+      </footer>
+    </div>
+
+    <script is:inline>
+      (() => {
+        const button = document.getElementById('theme-toggle');
+        if (!button) return;
+
+        const updateLabel = () => {
+          const theme = document.documentElement.dataset.theme || 'light';
+          button.textContent = theme === 'dark' ? 'Modo claro' : 'Modo oscuro';
+        };
+
+        updateLabel();
+
+        button.addEventListener('click', () => {
+          const current = document.documentElement.dataset.theme || 'light';
+          const next = current === 'dark' ? 'light' : 'dark';
+          document.documentElement.dataset.theme = next;
+          localStorage.setItem('theme', next);
+          updateLabel();
+        });
+      })();
+    </script>
   </body>
 </html>
