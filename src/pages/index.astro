@@ -63,6 +63,9 @@ const pageDescription = 'Panel privado para consultar repositorios de GitHub des
             <button class="btn btn-secondary" type="button" id="theme-toggle" aria-label="Cambiar modo claro u oscuro">
               Tema
             </button>
+            <button class="btn btn-danger hidden" type="button" id="logout-toggle">
+              Cerrar sesión
+            </button>
           </div>
         </nav>
       </header>
@@ -70,15 +73,13 @@ const pageDescription = 'Panel privado para consultar repositorios de GitHub des
       <main id="main" class="page-main">
         <section class="container-wide hero" aria-labelledby="hero-title">
           <div class="hero-inner">
-            <p class="eyebrow">Privado · Local · Sin servidor propio</p>
+            <p class="eyebrow">Privado · Local</p>
             <h1 id="hero-title">Admin Proyects</h1>
             <p>
-              Panel para ver tus repositorios de GitHub, últimos commits, lenguajes y deployments. Todo se consulta directamente desde tu navegador: el token no pasa por ningún servidor propio.
+              Panel para ver tus repositorios de GitHub, últimos commits y deployments. El token se guarda solo en tu navegador.
             </p>
-            <div class="hero-meta" aria-label="Características principales">
+            <div class="hero-meta" aria-label="Privacidad">
               <span class="badge badge-dot">Token solo en tu navegador</span>
-              <span class="badge badge-dot">Sin backend</span>
-              <span class="badge badge-dot">Conexión directa con GitHub</span>
             </div>
           </div>
         </section>
@@ -114,6 +115,25 @@ const pageDescription = 'Panel privado para consultar repositorios de GitHub des
           document.documentElement.dataset.theme = next;
           localStorage.setItem('theme', next);
           updateLabel();
+        });
+      })();
+
+      (() => {
+        const logoutButton = document.getElementById('logout-toggle');
+        if (!logoutButton) return;
+
+        const setVisible = (hasToken) => {
+          logoutButton.classList.toggle('hidden', !hasToken);
+        };
+
+        setVisible(Boolean(localStorage.getItem('proyect-admin.github-token')));
+
+        window.addEventListener('admin-projects-auth-change', (event) => {
+          setVisible(Boolean(event.detail?.hasToken));
+        });
+
+        logoutButton.addEventListener('click', () => {
+          window.dispatchEvent(new CustomEvent('admin-projects-logout'));
         });
       })();
     </script>
