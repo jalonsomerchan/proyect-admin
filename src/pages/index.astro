@@ -3,8 +3,8 @@ import '../styles/global.css';
 import Dashboard from '../components/Dashboard.jsx';
 
 const canonicalUrl = 'https://jalonsomerchan.github.io/proyect-admin/';
-const pageTitle = 'Dashboard GitHub client-side | Proyect Admin';
-const pageDescription = 'Panel privado para consultar repositorios de GitHub, commits, lenguajes y deployments desde el navegador sin servidor propio.';
+const pageTitle = 'Admin Proyects';
+const pageDescription = 'Panel privado para consultar repositorios de GitHub desde el navegador. El token se guarda solo en tu dispositivo.';
 ---
 
 <html lang="es" data-theme="light">
@@ -38,7 +38,7 @@ const pageDescription = 'Panel privado para consultar repositorios de GitHub, co
     <script type="application/ld+json" set:html={JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'WebApplication',
-      name: 'Proyect Admin',
+      name: 'Admin Proyects',
       url: canonicalUrl,
       applicationCategory: 'DeveloperApplication',
       operatingSystem: 'Any',
@@ -51,9 +51,9 @@ const pageDescription = 'Panel privado para consultar repositorios de GitHub, co
     <div class="site-shell">
       <header class="site-header">
         <nav class="container-wide site-nav" aria-label="Navegación principal">
-          <a class="brand" href={import.meta.env.BASE_URL} aria-label="Inicio de Proyect Admin">
-            <span class="brand-mark" aria-hidden="true">PA</span>
-            <span>Proyect Admin</span>
+          <a class="brand" href={import.meta.env.BASE_URL} aria-label="Inicio de Admin Proyects">
+            <span class="brand-mark" aria-hidden="true">AP</span>
+            <span>Admin Proyects</span>
           </a>
 
           <div class="nav-actions">
@@ -70,15 +70,15 @@ const pageDescription = 'Panel privado para consultar repositorios de GitHub, co
       <main id="main" class="page-main">
         <section class="container-wide hero" aria-labelledby="hero-title">
           <div class="hero-inner">
-            <p class="eyebrow">Herramienta privada · Sin servidor propio</p>
-            <h1 id="hero-title">Dashboard client-side para repositorios de GitHub</h1>
+            <p class="eyebrow">Privado · Local · Sin servidor propio</p>
+            <h1 id="hero-title">Admin Proyects</h1>
             <p>
-              Visualiza tus últimos 20 repositorios actualizados, el último commit, el lenguaje principal y el estado del deployment más reciente usando solo la API de GitHub desde el navegador.
+              Panel para ver tus repositorios de GitHub, últimos commits, lenguajes y deployments. Todo se consulta directamente desde tu navegador: el token no pasa por ningún servidor propio.
             </p>
             <div class="hero-meta" aria-label="Características principales">
-              <span class="badge badge-dot">Token en localStorage</span>
-              <span class="badge badge-dot">Astro + Preact</span>
-              <span class="badge badge-dot">Light y dark mode</span>
+              <span class="badge badge-dot">Token solo en tu navegador</span>
+              <span class="badge badge-dot">Sin backend</span>
+              <span class="badge badge-dot">Conexión directa con GitHub</span>
             </div>
           </div>
         </section>
@@ -90,8 +90,8 @@ const pageDescription = 'Panel privado para consultar repositorios de GitHub, co
 
       <footer class="site-footer">
         <div class="container-wide footer-inner">
-          <strong>Proyect Admin</strong>
-          <span>Panel ligero, accesible y mobile first para consultar información de GitHub de forma local en el navegador.</span>
+          <strong>Admin Proyects</strong>
+          <span>Panel ligero y privado para consultar información de GitHub de forma local en el navegador.</span>
         </div>
       </footer>
     </div>
