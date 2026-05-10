@@ -4,6 +4,7 @@ const TOKEN_STORAGE_KEY = 'proyect-admin.github-token';
 const API_BASE_URL = 'https://api.github.com';
 const FINE_GRAINED_TOKEN_URL = 'https://github.com/settings/personal-access-tokens/new';
 const TOKENS_SETTINGS_URL = 'https://github.com/settings/tokens';
+const BROKEN_DEPLOYMENT_STATES = new Set(['failure', 'error']);
 
 const deploymentStyles = {
   success: 'status-success',
@@ -283,6 +284,10 @@ export default function Dashboard() {
     });
   }, [repos, searchQuery]);
 
+  const brokenDeploymentRepos = useMemo(() => {
+    return repos.filter((repo) => BROKEN_DEPLOYMENT_STATES.has(repo.deployment?.state));
+  }, [repos]);
+
   function handleLogin(event) {
     event.preventDefault();
 
@@ -395,6 +400,27 @@ export default function Dashboard() {
           </button>
         </div>
       </div>
+
+      {!isLoading && brokenDeploymentRepos.length ? (
+        <div className="alert alert-danger" role="alert">
+          <strong>
+            {brokenDeploymentRepos.length === 1
+              ? 'Hay 1 proyecto con deploy fallido.'
+              : `Hay ${brokenDeploymentRepos.length} proyectos con deploy fallido.`}
+          </strong>
+          <ul className="mt-3 grid gap-2 pl-5 text-sm font-medium" style={{ listStyle: 'disc' }}>
+            {brokenDeploymentRepos.map((repo) => (
+              <li key={repo.id}>
+                <a href={repo.url} target="_blank" rel="noreferrer">
+                  {repo.name}
+                </a>{' '}
+                — {getDeploymentLabel(repo.deployment.state)}
+                {repo.deployment.environment ? ` en ${repo.deployment.environment}` : ''}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       {error ? (
         <div className="alert alert-danger" role="alert">
