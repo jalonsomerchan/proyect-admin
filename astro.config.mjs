@@ -10,6 +10,7 @@ import sitemap from '@astrojs/sitemap';
 export default defineConfig({
   site: 'https://jalonsomerchan.github.io',
   base: '/proyect-admin',
+  outDir: './docs',
   vite: {
     plugins: [tailwindcss()]
   },
