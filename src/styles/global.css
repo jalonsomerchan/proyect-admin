@@ -372,6 +372,13 @@ a:focus-visible {
   color: var(--color-danger);
 }
 
+.btn-compact {
+  min-height: 2.35rem;
+  border-radius: var(--radius-md);
+  padding: 0.62rem 0.8rem;
+  font-size: 0.875rem;
+}
+
 .btn-full-mobile {
   width: 100%;
 }
@@ -403,6 +410,10 @@ a:focus-visible {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 4px var(--color-primary-soft);
+}
+
+.search-input {
+  font-family: var(--font-sans);
 }
 
 .help-text {
@@ -494,9 +505,11 @@ a:focus-visible {
   gap: var(--space-4);
 }
 
-.dashboard-grid {
+.dashboard-grid,
+.loading-grid,
+.repo-list-view {
   display: grid;
-  gap: var(--space-5);
+  gap: var(--space-4);
 }
 
 .repo-card {
@@ -506,9 +519,26 @@ a:focus-visible {
   justify-content: space-between;
 }
 
+.repo-row {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+
+.repo-row-main {
+  min-width: 0;
+}
+
+.repo-row-titleline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
 .repo-title {
   color: var(--color-text);
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 1.25;
@@ -529,15 +559,43 @@ a:focus-visible {
 .repo-description,
 .repo-empty-description {
   display: -webkit-box;
-  min-height: 3rem;
   overflow: hidden;
   line-height: 1.6;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
 }
 
 .repo-empty-description {
   color: var(--color-text-soft);
+}
+
+.repo-row-description {
+  margin: var(--space-2) 0 0;
+}
+
+.repo-row-info {
+  display: grid;
+  gap: var(--space-3);
+  color: var(--color-text);
+  font-size: 0.875rem;
+}
+
+.repo-row-info > div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.repo-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.repo-footer-label {
+  color: var(--color-text-soft);
+  font-size: 0.8125rem;
+  font-weight: 800;
 }
 
 .repo-list {
@@ -555,8 +613,7 @@ a:focus-visible {
   gap: var(--space-4);
 }
 
-.repo-list dt,
-.repo-footer-label {
+.repo-list dt {
   color: var(--color-text-soft);
   font-weight: 700;
 }
@@ -574,11 +631,6 @@ a:focus-visible {
   padding-top: var(--space-5);
 }
 
-.loading-grid {
-  display: grid;
-  gap: var(--space-5);
-}
-
 .skeleton-card {
   min-height: 14rem;
   border: 1px solid var(--color-border);
@@ -586,6 +638,10 @@ a:focus-visible {
   background: linear-gradient(90deg, var(--color-surface), var(--color-surface-soft), var(--color-surface));
   background-size: 200% 100%;
   animation: skeleton 1.2s ease-in-out infinite;
+}
+
+.skeleton-row {
+  min-height: 8rem;
 }
 
 .site-footer {
@@ -626,10 +682,20 @@ a:focus-visible {
   }
 }
 
-@media (min-width: 768px) {
-  .dashboard-grid,
-  .loading-grid {
+@media (min-width: 900px) {
+  .repo-row {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+  }
+
+  .repo-row-info {
+    min-width: 18rem;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .repo-row-actions {
+    justify-content: flex-end;
+    min-width: 10rem;
   }
 }
 
@@ -640,13 +706,6 @@ a:focus-visible {
 
   .hero h1 {
     max-width: 16ch;
-  }
-}
-
-@media (min-width: 1280px) {
-  .dashboard-grid,
-  .loading-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
