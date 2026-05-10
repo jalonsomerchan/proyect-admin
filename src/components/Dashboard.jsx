@@ -218,12 +218,26 @@ export default function Dashboard() {
         <div className="panel-body">
           <div className="section-stack">
             <div>
-              <p className="eyebrow">Client-side only</p>
+              <p className="eyebrow">Privacidad primero</p>
               <h2 id="connect-title" className="text-3xl font-extrabold tracking-tight">
-                Conecta tu cuenta de GitHub
+                Conecta GitHub con un token personal
               </h2>
               <p className="mt-3 text-base text-[var(--color-text-muted)]">
-                El token se guarda solo en tu navegador mediante localStorage. No se envía a ningún servidor propio ni se usa ninguna variable de entorno.
+                Tu token se queda en este navegador. No hay backend, no hay base de datos y no se manda a ningún servidor de Admin Proyects: solo se usa para llamar directamente a la API oficial de GitHub.
+              </p>
+            </div>
+
+            <div className="alert">
+              <strong>Cómo conseguir el token:</strong>
+              <ol className="mt-3 grid gap-2 pl-5 text-sm font-medium" style={{ listStyle: 'decimal' }}>
+                <li>Entra en GitHub y abre <strong>Settings</strong>.</li>
+                <li>Ve a <strong>Developer settings</strong> → <strong>Personal access tokens</strong>.</li>
+                <li>Elige <strong>Fine-grained tokens</strong> → <strong>Generate new token</strong>.</li>
+                <li>Selecciona tus repositorios y concede permisos de solo lectura para <strong>Contents</strong>, <strong>Metadata</strong> y <strong>Deployments</strong>.</li>
+                <li>Copia el token generado y pégalo aquí. GitHub solo lo muestra una vez.</li>
+              </ol>
+              <p className="help-text">
+                Consejo: crea un token con caducidad y permisos mínimos. No uses permisos de escritura si solo quieres consultar datos.
               </p>
             </div>
 
@@ -242,7 +256,7 @@ export default function Dashboard() {
                   autoComplete="off"
                 />
                 <p className="help-text">
-                  Permisos recomendados: lectura de repositorios y deployments. Para repos privados, el token necesita acceso a esos repositorios.
+                  El token se guarda en localStorage de tu navegador. Puedes borrarlo en cualquier momento con “Cerrar sesión”.
                 </p>
               </div>
 
