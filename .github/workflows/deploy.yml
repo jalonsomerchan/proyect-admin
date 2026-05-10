@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: Build Astro into docs
 
 on:
   push:
@@ -9,15 +9,18 @@ permissions:
   contents: write
 
 concurrency:
-  group: pages
+  group: pages-main-docs
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
+    if: github.actor != 'github-actions[bot]'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -28,13 +31,14 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build Astro site
+      - name: Build Astro site into docs
         run: npm run build
 
-      - name: Deploy dist to gh-pages branch
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Add nojekyll file to docs
+        run: touch docs/.nojekyll
+
+      - name: Commit built site to main
+        uses: stefanzweifel/git-auto-commit-action@v6
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          publish_branch: gh-pages
-          force_orphan: true
+          commit_message: Build Astro site into docs
+          file_pattern: docs package-lock.json
