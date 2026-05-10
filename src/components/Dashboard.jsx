@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'preact/hooks';
 
 const TOKEN_STORAGE_KEY = 'proyect-admin.github-token';
 const API_BASE_URL = 'https://api.github.com';
+const FINE_GRAINED_TOKEN_URL = 'https://github.com/settings/personal-access-tokens/new';
+const TOKENS_SETTINGS_URL = 'https://github.com/settings/tokens';
 
 const deploymentStyles = {
   success: 'status-success',
@@ -229,12 +231,19 @@ export default function Dashboard() {
 
             <div className="alert">
               <strong>Cómo conseguir el token:</strong>
-              <ol className="mt-3 grid gap-2 pl-5 text-sm font-medium" style={{ listStyle: 'decimal' }}>
-                <li>Entra en GitHub y abre <strong>Settings</strong>.</li>
-                <li>Ve a <strong>Developer settings</strong> → <strong>Personal access tokens</strong>.</li>
-                <li>Elige <strong>Fine-grained tokens</strong> → <strong>Generate new token</strong>.</li>
-                <li>Selecciona tus repositorios y concede permisos de solo lectura para <strong>Contents</strong>, <strong>Metadata</strong> y <strong>Deployments</strong>.</li>
-                <li>Copia el token generado y pégalo aquí. GitHub solo lo muestra una vez.</li>
+              <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                <a className="btn btn-primary btn-full-mobile" href={FINE_GRAINED_TOKEN_URL} target="_blank" rel="noreferrer">
+                  Crear token en GitHub
+                </a>
+                <a className="btn btn-secondary btn-full-mobile" href={TOKENS_SETTINGS_URL} target="_blank" rel="noreferrer">
+                  Ver mis tokens
+                </a>
+              </div>
+              <ol className="mt-4 grid gap-2 pl-5 text-sm font-medium" style={{ listStyle: 'decimal' }}>
+                <li>Se abrirá GitHub en <strong>Fine-grained personal access tokens</strong>.</li>
+                <li>Elige nombre, caducidad y los repositorios que quieres consultar.</li>
+                <li>En permisos, usa solo lectura para <strong>Contents</strong>, <strong>Metadata</strong> y <strong>Deployments</strong>.</li>
+                <li>Genera el token, cópialo y pégalo aquí. GitHub solo lo muestra una vez.</li>
               </ol>
               <p className="help-text">
                 Consejo: crea un token con caducidad y permisos mínimos. No uses permisos de escritura si solo quieres consultar datos.
