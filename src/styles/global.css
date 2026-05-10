@@ -133,6 +133,10 @@ input {
   font: inherit;
 }
 
+.hidden {
+  display: none !important;
+}
+
 .skip-link {
   position: fixed;
   left: var(--space-4);
@@ -213,7 +217,9 @@ input {
 
 .nav-actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-end;
   gap: var(--space-2);
 }
 
@@ -499,12 +505,6 @@ a:focus-visible {
   color: var(--color-text-soft);
 }
 
-.dashboard-header {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
 .dashboard-grid,
 .loading-grid,
 .repo-list-view {
@@ -512,11 +512,13 @@ a:focus-visible {
   gap: var(--space-4);
 }
 
-.repo-card {
-  min-height: 16rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+.repo-toolbar {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.repo-search-field {
+  min-width: 0;
 }
 
 .repo-row {
@@ -598,39 +600,6 @@ a:focus-visible {
   font-weight: 800;
 }
 
-.repo-list {
-  display: grid;
-  gap: var(--space-3);
-  margin: var(--space-5) 0 0;
-  font-size: 0.875rem;
-}
-
-.repo-list-row,
-.repo-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-}
-
-.repo-list dt {
-  color: var(--color-text-soft);
-  font-weight: 700;
-}
-
-.repo-list dd {
-  margin: 0;
-  color: var(--color-text);
-  font-weight: 800;
-  text-align: right;
-}
-
-.repo-footer {
-  margin-top: var(--space-6);
-  border-top: 1px solid var(--color-border);
-  padding-top: var(--space-5);
-}
-
 .skeleton-card {
   min-height: 14rem;
   border: 1px solid var(--color-border);
@@ -674,11 +643,12 @@ a:focus-visible {
   .card-body {
     padding: var(--space-6);
   }
+}
 
-  .dashboard-header {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
+@media (min-width: 760px) {
+  .repo-toolbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
   }
 }
 
