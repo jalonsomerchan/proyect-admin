@@ -26,6 +26,18 @@ function formatDate(value) {
   }).format(new Date(value));
 }
 
+function normalizeHomepage(value) {
+  const cleanValue = value?.trim();
+
+  if (!cleanValue) return '';
+
+  if (cleanValue.startsWith('http://') || cleanValue.startsWith('https://')) {
+    return cleanValue;
+  }
+
+  return `https://${cleanValue}`;
+}
+
 function getDeploymentLabel(status) {
   const labels = {
     success: 'Correcto',
@@ -121,8 +133,8 @@ async function getRepositoriesWithDetails(token) {
         name: repo.name,
         fullName: repo.full_name,
         url: repo.html_url,
+        homepage: normalizeHomepage(repo.homepage),
         description: repo.description,
-        language: repo.language || 'Sin lenguaje principal',
         private: repo.private,
         lastCommitDate:
           lastCommitDate.status === 'fulfilled'
@@ -141,6 +153,7 @@ export default function Dashboard() {
   const [token, setToken] = useState('');
   const [inputToken, setInputToken] = useState('');
   const [repos, setRepos] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -186,11 +199,24 @@ export default function Dashboard() {
     };
   }, [token]);
 
+  const filteredRepos = useMemo(() => {
+    const cleanQuery = searchQuery.trim().toLowerCase();
+
+    if (!cleanQuery) return repos;
+
+    return repos.filter((repo) => {
+      return [repo.name, repo.fullName, repo.description, repo.homepage]
+        .filter(Boolean)
+        .some((value) => value.toLowerCase().includes(cleanQuery));
+    });
+  }, [repos, searchQuery]);
+
   const repoCountText = useMemo(() => {
     if (isLoading) return 'Cargando repositorios...';
     if (!repos.length) return 'Sin repositorios cargados';
+    if (searchQuery.trim()) return `${filteredRepos.length} de ${repos.length} repositorios`;
     return `${repos.length} repositorios recientes`;
-  }, [isLoading, repos.length]);
+  }, [filteredRepos.length, isLoading, repos.length, searchQuery]);
 
   function handleLogin(event) {
     event.preventDefault();
@@ -211,6 +237,7 @@ export default function Dashboard() {
     localStorage.removeItem(TOKEN_STORAGE_KEY);
     setToken('');
     setRepos([]);
+    setSearchQuery('');
     setError('');
   }
 
@@ -292,7 +319,7 @@ export default function Dashboard() {
           <div>
             <p className="eyebrow">GitHub dashboard</p>
             <h2 id="repositories-title" className="text-3xl font-extrabold tracking-tight">
-              Últimos repositorios actualizados
+              Repositorios
             </h2>
             <p className="mt-2 text-[var(--color-text-muted)]">{repoCountText}</p>
           </div>
@@ -303,6 +330,20 @@ export default function Dashboard() {
         </div>
       </div>
 
+      <div className="panel">
+        <div className="panel-body">
+          <label className="label" htmlFor="repo-search">Buscar proyecto</label>
+          <input
+            id="repo-search"
+            className="input search-input"
+            type="search"
+            placeholder="Busca por nombre, descripción o URL..."
+            value={searchQuery}
+            onInput={(event) => setSearchQuery(event.currentTarget.value)}
+          />
+        </div>
+      </div>
+
       {error ? (
         <div className="alert alert-danger" role="alert">
           {error}
@@ -310,62 +351,66 @@ export default function Dashboard() {
       ) : null}
 
       {isLoading ? (
-        <div className="loading-grid" aria-label="Cargando repositorios">
+        <div className="repo-list-view" aria-label="Cargando repositorios">
           {Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="skeleton-card" />
+            <div key={index} className="skeleton-card skeleton-row" />
           ))}
         </div>
-      ) : (
-        <div className="dashboard-grid">
-          {repos.map((repo) => {
+      ) : filteredRepos.length ? (
+        <div className="repo-list-view">
+          {filteredRepos.map((repo) => {
             const deploymentState = repo.deployment.state || 'unknown';
             const deploymentClass = deploymentStyles[deploymentState] || deploymentStyles.unknown;
 
             return (
-              <article key={repo.id} className="card repo-card">
-                <div className="card-body">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <a className="repo-title" href={repo.url} target="_blank" rel="noreferrer">
-                        {repo.name}
-                      </a>
-                      <p className="repo-meta">{repo.fullName}</p>
-                    </div>
+              <article key={repo.id} className="card repo-row">
+                <div className="repo-row-main">
+                  <div className="repo-row-titleline">
+                    <a className="repo-title" href={repo.url} target="_blank" rel="noreferrer">
+                      {repo.name}
+                    </a>
                     {repo.private ? <span className="badge">Privado</span> : null}
                   </div>
 
+                  <p className="repo-meta">{repo.fullName}</p>
+
                   {repo.description ? (
-                    <p className="repo-description mt-5">{repo.description}</p>
+                    <p className="repo-description repo-row-description">{repo.description}</p>
                   ) : (
-                    <p className="repo-empty-description mt-5">Sin descripción.</p>
+                    <p className="repo-empty-description repo-row-description">Sin descripción.</p>
                   )}
+                </div>
 
-                  <dl className="repo-list">
-                    <div className="repo-list-row">
-                      <dt>Último commit</dt>
-                      <dd>{formatDate(repo.lastCommitDate)}</dd>
-                    </div>
-                    <div className="repo-list-row">
-                      <dt>Lenguaje</dt>
-                      <dd><span className="badge">{repo.language}</span></dd>
-                    </div>
-                  </dl>
-
-                  <div className="repo-footer">
-                    <div>
-                      <p className="repo-footer-label">Deployment</p>
-                      {repo.deployment.environment ? (
-                        <p className="repo-meta">{repo.deployment.environment}</p>
-                      ) : null}
-                    </div>
+                <div className="repo-row-info" aria-label="Información del repositorio">
+                  <div>
+                    <span className="repo-footer-label">Último commit</span>
+                    <strong>{formatDate(repo.lastCommitDate)}</strong>
+                  </div>
+                  <div>
+                    <span className="repo-footer-label">Deployment</span>
                     <span className={`status-badge ${deploymentClass}`}>
                       {getDeploymentLabel(deploymentState)}
                     </span>
                   </div>
                 </div>
+
+                <div className="repo-row-actions">
+                  <a className="btn btn-secondary btn-compact" href={repo.url} target="_blank" rel="noreferrer">
+                    GitHub
+                  </a>
+                  {repo.homepage ? (
+                    <a className="btn btn-primary btn-compact" href={repo.homepage} target="_blank" rel="noreferrer">
+                      Ver web
+                    </a>
+                  ) : null}
+                </div>
               </article>
             );
           })}
+        </div>
+      ) : (
+        <div className="alert">
+          No hay repositorios que coincidan con la búsqueda.
         </div>
       )}
     </section>
