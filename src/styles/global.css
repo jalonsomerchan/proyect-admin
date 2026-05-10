@@ -582,10 +582,21 @@ a:focus-visible {
   font-size: 0.875rem;
 }
 
-.repo-row-info > div {
+.repo-row-info > div,
+.repo-count-link {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
+}
+
+.repo-count-link {
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.repo-count-link:hover strong {
+  color: var(--color-primary);
 }
 
 .repo-row-actions {
@@ -659,8 +670,8 @@ a:focus-visible {
   }
 
   .repo-row-info {
-    min-width: 18rem;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    min-width: 27rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .repo-row-actions {
