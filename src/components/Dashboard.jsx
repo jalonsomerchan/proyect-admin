@@ -58,6 +58,20 @@ function getDeploymentLabel(status) {
   return labels[status] ?? status;
 }
 
+function getCountFromLinkHeader(linkHeader, dataLength) {
+  if (!linkHeader) return dataLength;
+
+  const lastLink = linkHeader
+    .split(',')
+    .map((part) => part.trim())
+    .find((part) => part.includes('rel="last"'));
+
+  if (!lastLink) return dataLength;
+
+  const match = lastLink.match(/[?&]page=(\d+)/);
+  return match ? Number(match[1]) : dataLength;
+}
+
 async function githubFetch(path, token) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     headers: {
@@ -82,6 +96,23 @@ async function githubFetch(path, token) {
   }
 
   return response.json();
+}
+
+async function githubFetchCount(path, token) {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    headers: {
+      Accept: 'application/vnd.github+json',
+      Authorization: `Bearer ${token}`,
+      'X-GitHub-Api-Version': '2022-11-28'
+    }
+  });
+
+  if (!response.ok) return 0;
+
+  const data = await response.json();
+  if (!Array.isArray(data) || data.length === 0) return 0;
+
+  return getCountFromLinkHeader(response.headers.get('Link'), data.length);
 }
 
 async function getLatestDeploymentState(repo, token) {
@@ -122,24 +153,36 @@ async function getLatestCommitDate(repo, token) {
   return commits?.[0]?.commit?.committer?.date || repo.pushed_at || repo.updated_at;
 }
 
+async function getOpenPullRequestsCount(repo, token) {
+  return githubFetchCount(`/repos/${repo.full_name}/pulls?state=open&per_page=1`, token);
+}
+
 async function getRepositoriesWithDetails(token) {
   const repos = await githubFetch('/user/repos?sort=updated&direction=desc&per_page=20', token);
 
   return Promise.all(
     repos.map(async (repo) => {
-      const [lastCommitDate, deployment] = await Promise.allSettled([
+      const [lastCommitDate, deployment, openPullRequestsCount] = await Promise.allSettled([
         getLatestCommitDate(repo, token),
-        getLatestDeploymentState(repo, token)
+        getLatestDeploymentState(repo, token),
+        getOpenPullRequestsCount(repo, token)
       ]);
+
+      const prCount = openPullRequestsCount.status === 'fulfilled' ? openPullRequestsCount.value : 0;
+      const totalOpenIssuesAndPrs = Number(repo.open_issues_count || 0);
 
       return {
         id: repo.id,
         name: repo.name,
         fullName: repo.full_name,
         url: repo.html_url,
+        issuesUrl: `${repo.html_url}/issues`,
+        pullsUrl: `${repo.html_url}/pulls`,
         homepage: normalizeHomepage(repo.homepage),
         description: repo.description,
         private: repo.private,
+        openIssuesCount: Math.max(totalOpenIssuesAndPrs - prCount, 0),
+        openPullRequestsCount: prCount,
         lastCommitDate:
           lastCommitDate.status === 'fulfilled'
             ? lastCommitDate.value
@@ -401,6 +444,14 @@ export default function Dashboard() {
                       {getDeploymentLabel(deploymentState)}
                     </span>
                   </div>
+                  <a className="repo-count-link" href={repo.issuesUrl} target="_blank" rel="noreferrer">
+                    <span className="repo-footer-label">Issues</span>
+                    <strong>{repo.openIssuesCount}</strong>
+                  </a>
+                  <a className="repo-count-link" href={repo.pullsUrl} target="_blank" rel="noreferrer">
+                    <span className="repo-footer-label">PR</span>
+                    <strong>{repo.openPullRequestsCount}</strong>
+                  </a>
                 </div>
 
                 <div className="repo-row-actions">
